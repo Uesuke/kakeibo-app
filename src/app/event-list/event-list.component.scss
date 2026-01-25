@@ -1,0 +1,47 @@
+.summary {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+.summary .income {
+  color: #2e7d32;
+}
+
+.summary .expense {
+  color: #c62828;
+}
+
+.summary .balance {
+  color: #1565c0;
+}
+
+.event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.event-list li {
+  display: grid;
+  grid-template-columns: 120px 1fr 140px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  align-items: center;
+}
+
+.event-list li.income {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.event-list li.expense {
+  background-color: #fdecea;
+  color: #c62828;
+}
+
+.amount {
+  text-align: right;
+  font-weight: bold;
+}

@@ -1,0 +1,15 @@
+<div class="summary">
+  <div class="income">収入合計: {{ totalIncome | number }} 円</div>
+  <div class="expense">支出合計: {{ totalExpense | number }} 円</div>
+  <div class="balance">差引: {{ balance | number }} 円</div>
+</div>
+
+<hr />
+
+<ul class="event-list">
+  <li *ngFor="let e of events" [ngClass]="{ income: e.isIncome, expense: !e.isIncome }">
+    <span class="date">{{ e.date }}</span>
+    <span class="title">{{ e.title }}</span>
+    <span class="amount"> {{ e.isIncome ? '+' : '-' }}{{ e.amount | number }} 円 </span>
+  </li>
+</ul>
