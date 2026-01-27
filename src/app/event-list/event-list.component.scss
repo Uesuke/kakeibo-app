@@ -45,3 +45,34 @@
   text-align: right;
   font-weight: bold;
 }
+
+.month-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  button {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  button.today {
+    margin-left: 8px;
+    background: #1976d2;
+    color: #fff;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  .month-label {
+    font-weight: bold;
+    font-size: 1.1rem;
+    min-width: 100px;
+    text-align: center;
+  }
+}

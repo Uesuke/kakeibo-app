@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { EventsService, Event } from '../services/events.service';
+import { getPrevMonth, getNextMonth, getCurrentMonth } from '../utils/month.util';
 
 @Component({
   selector: 'app-event-list',
@@ -16,6 +17,11 @@ export class EventListComponent implements OnInit {
   totalExpense = 0;
   balance = 0;
 
+  userName = 'Shin';
+
+  /** 表示中の月（YYYYMM） */
+  currentMonth = getCurrentMonth();
+
   constructor(
     private eventsService: EventsService,
     private cdr: ChangeDetectorRef,
@@ -26,7 +32,7 @@ export class EventListComponent implements OnInit {
   }
 
   fetchEvents() {
-    this.eventsService.getEvents('Shin', '202601').subscribe({
+    this.eventsService.getEvents(this.userName, this.currentMonth).subscribe({
       next: (items) => {
         this.events = items;
         this.calculateTotals();
@@ -49,5 +55,26 @@ export class EventListComponent implements OnInit {
     }
 
     this.balance = this.totalIncome - this.totalExpense;
+  }
+
+  get formattedMonth(): string {
+    const year = this.currentMonth.slice(0, 4);
+    const month = this.currentMonth.slice(4, 6);
+    return `${year}年${month}月`;
+  }
+
+  prevMonth() {
+    this.currentMonth = getPrevMonth(this.currentMonth);
+    this.fetchEvents();
+  }
+
+  nextMonth() {
+    this.currentMonth = getNextMonth(this.currentMonth);
+    this.fetchEvents();
+  }
+
+  goToCurrentMonth() {
+    this.currentMonth = getCurrentMonth();
+    this.fetchEvents();
   }
 }

@@ -1,3 +1,13 @@
+<div class="month-header">
+  <button (click)="prevMonth()">◀</button>
+
+  <span class="month-label">{{ formattedMonth }}</span>
+
+  <button (click)="nextMonth()">▶</button>
+
+  <button class="today" (click)="goToCurrentMonth()">今月</button>
+</div>
+
 <div class="summary">
   <div class="income">収入合計: {{ totalIncome | number }} 円</div>
   <div class="expense">支出合計: {{ totalExpense | number }} 円</div>
