@@ -1,0 +1,62 @@
+<h2>新規イベント</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <!-- 日付 -->
+  <div class="form-group">
+    <label>
+      日付
+      <input type="date" formControlName="date" />
+    </label>
+  </div>
+
+  <!-- 収入 / 支出 -->
+  <div class="form-group inline">
+    <label>
+      <input type="radio" formControlName="isIncome" [value]="true" />
+      収入
+    </label>
+
+    <label>
+      <input type="radio" formControlName="isIncome" [value]="false" />
+      支出
+    </label>
+  </div>
+
+  <!-- 支払い方法（支出のみ） -->
+  <div class="form-group inline" *ngIf="!form.value.isIncome">
+    <label>
+      <input type="radio" formControlName="paymentType" value="cash" />
+      現金
+    </label>
+
+    <label>
+      <input type="radio" formControlName="paymentType" value="credit" />
+      クレジット
+    </label>
+  </div>
+
+  <!-- タイトル -->
+  <div class="form-group">
+    <label>
+      タイトル
+      <input type="text" formControlName="title" />
+    </label>
+  </div>
+
+  <!-- 金額 -->
+  <div class="form-group">
+    <label>
+      金額
+      <input type="number" formControlName="amount" />
+    </label>
+  </div>
+
+  <!-- アクション -->
+  <div class="actions">
+    <button type="submit" [disabled]="form.invalid || isSubmitting">
+      {{ isSubmitting ? '登録中…' : '登録' }}
+    </button>
+
+    <button type="button" (click)="close()" [disabled]="isSubmitting">キャンセル</button>
+  </div>
+</form>

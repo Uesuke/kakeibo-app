@@ -14,6 +14,14 @@
   <div class="balance">差引: {{ balance | number }} 円</div>
 </div>
 
+<button (click)="openModal()">＋ 追加</button>
+
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal">
+    <app-event-form (submitEvent)="onSubmit($event)" (cancel)="closeModal()"></app-event-form>
+  </div>
+</div>
+
 <hr />
 
 <ul class="event-list">

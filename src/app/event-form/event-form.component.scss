@@ -1,0 +1,73 @@
+form {
+  display: grid;
+  gap: 16px;
+}
+
+/* フォームの1ブロック */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  input[type='text'],
+  input[type='number'],
+  input[type='date'] {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+
+    &:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+  }
+}
+
+/* ラジオボタン横並び */
+.form-group.inline {
+  flex-direction: row;
+  gap: 16px;
+
+  label {
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+/* ボタンエリア */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+
+  button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  button[type='submit'] {
+    background: #1976d2;
+    color: #fff;
+  }
+
+  button[type='button'] {
+    background: #eee;
+  }
+}
