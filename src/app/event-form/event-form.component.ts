@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Event } from '../services/events.service';
 
 @Component({
   selector: 'app-event-form',
@@ -21,14 +22,27 @@ export class EventFormComponent {
   /** キャンセル（モーダルを閉じる） */
   @Output() cancel = new EventEmitter<void>();
 
+  /** 編集中イベント */
+  @Input() editingEvent: Event | null = null;
+
+  /** 今日の日付（YYYY-MM-DD） */
+  private today = new Date().toISOString().slice(0, 10);
+
   /** 入力フォーム定義 */
   form = this.fb.group({
-    date: ['', Validators.required],
+    date: [this.today, Validators.required],
     isIncome: [true, Validators.required],
     paymentType: ['cash'], // 'cash' | 'credit'
     title: ['', Validators.required],
-    amount: [null, [Validators.required, Validators.min(1)]],
+    amount: [0, [Validators.required, Validators.min(1)]],
   });
+
+  /** 編集時更新処理 */
+  ngOnChanges() {
+    if (this.editingEvent) {
+      this.setFormForEdit(this.editingEvent);
+    }
+  }
 
   /** フォーム送信 */
   submit() {
@@ -41,5 +55,25 @@ export class EventFormComponent {
   /** モーダルを閉じる */
   close() {
     this.cancel.emit();
+  }
+
+  private setFormForEdit(event: Event) {
+    this.form.patchValue({
+      date: this.toInputDate(event.date),
+      isIncome: event.isIncome,
+      paymentType: this.toPaymentType(event),
+      title: event.title ?? '',
+      amount: event.amount,
+    });
+  }
+
+  private toInputDate(date: string): string {
+    // 20260201 → 2026-02-01
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+  }
+
+  private toPaymentType(event: Event): 'cash' | 'credit' {
+    if (event.isIncome) return 'cash'; // 収入時は意味を持たせない
+    return event.isCredit === 1 ? 'credit' : 'cash';
   }
 }

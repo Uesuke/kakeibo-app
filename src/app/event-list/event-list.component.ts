@@ -52,8 +52,13 @@ export class EventListComponent implements OnInit {
    */
   showModal = false;
 
+  isEditMode = false;
+
   /** 登録中フラグ（多重送信防止用） */
   isSubmitting = false;
+
+  /** 編集中イベント */
+  editingEvent: Event | null = null;
 
   constructor(
     /**
@@ -156,14 +161,27 @@ export class EventListComponent implements OnInit {
    * イベント登録モーダルを表示する
    */
   openModal() {
+    this.editingEvent = null;
+    this.isEditMode = false;
     this.showModal = true;
   }
 
   /**
-   * イベント登録モーダルを閉じる
+   * イベント編集モードでモーダルを表示する
+   * @param event
+   */
+  onEdit(event: Event) {
+    this.editingEvent = event;
+    this.isEditMode = true;
+    this.showModal = true;
+  }
+
+  /**
+   * イベント登録/編集モーダルを閉じる
    */
   closeModal() {
     this.showModal = false;
+    this.editingEvent = null;
   }
 
   /**
@@ -171,37 +189,39 @@ export class EventListComponent implements OnInit {
    * EventFormComponent から emit された値を受け取る
    */
   onSubmit(formValue: any) {
-    const isIncome = formValue.isIncome;
-
     const payload = {
-      date: formValue.date.replace(/-/g, ''),
-      title: formValue.title,
-      amount: formValue.amount,
-      isIncome,
-
-      // ルールをここで保証する
-      isCredit: isIncome
-        ? 0 // 収入なら必ず 0
-        : formValue.paymentType === 'credit'
-          ? 1
-          : 0,
-
+      ...formValue,
       userName: this.userName,
+      date: formValue.date.replace(/-/g, ''),
+      isCredit: formValue.isIncome ? 0 : formValue.paymentType === 'credit' ? 1 : 0,
     };
 
     this.isSubmitting = true;
 
-    this.eventsService.createEvent(payload).subscribe({
+    const request$ = this.editingEvent
+      ? this.eventsService.updateEvent(this.editingEvent.eventId, payload)
+      : this.eventsService.createEvent(payload);
+
+    request$.subscribe({
       next: () => {
         this.closeModal();
         this.fetchEvents();
       },
-      error: (err) => {
-        console.error('イベント登録に失敗しました', err);
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
+      error: (err) => console.error(err),
+      complete: () => (this.isSubmitting = false),
+    });
+  }
+
+  /**
+   * 削除処理
+   */
+  delete(event: Event) {
+    const ok = confirm(`「${event.title}」を削除しますか？`);
+    if (!ok) return;
+
+    this.eventsService.deleteEvent(event.eventId).subscribe({
+      next: () => this.fetchEvents(),
+      error: (err) => console.error('削除失敗', err),
     });
   }
 }

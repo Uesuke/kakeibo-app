@@ -92,3 +92,37 @@
   border-radius: 12px;
   width: 360px;
 }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.actions button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f5f5f5; // 共通：白っぽい文字
+}
+
+/* 編集ボタン（濃いブルー） */
+.actions .edit {
+  background: #1565c0;
+
+  &:hover {
+    background: #0d47a1;
+  }
+}
+
+/* 削除ボタン（濃いレッド） */
+.actions .delete {
+  background: #c62828;
+
+  &:hover {
+    background: #8e0000;
+  }
+}

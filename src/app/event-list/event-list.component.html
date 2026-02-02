@@ -18,7 +18,12 @@
 
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal">
-    <app-event-form (submitEvent)="onSubmit($event)" (cancel)="closeModal()"></app-event-form>
+    <app-event-form
+      [editingEvent]="editingEvent"
+      [isSubmitting]="isSubmitting"
+      (submitEvent)="onSubmit($event)"
+      (cancel)="closeModal()"
+    ></app-event-form>
   </div>
 </div>
 
@@ -29,5 +34,10 @@
     <span class="date">{{ e.date }}</span>
     <span class="title">{{ e.title }}</span>
     <span class="amount"> {{ e.isIncome ? '+' : '-' }}{{ e.amount | number }} 円 </span>
+
+    <div class="actions">
+      <button class="edit" (click)="onEdit(e)">編集</button>
+      <button class="delete" (click)="delete(e)">削除</button>
+    </div>
   </li>
 </ul>
