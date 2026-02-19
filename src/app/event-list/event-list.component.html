@@ -14,7 +14,14 @@
   <div class="balance">差引: {{ balance | number }} 円</div>
 </div>
 
-<button (click)="openModal()">＋ 追加</button>
+<button
+  (click)="openModal()"
+  [disabled]="selectedUser === 'both'"
+  title="ユーザーを選択すると追加できます"
+  class="create"
+>
+  ＋ 追加
+</button>
 
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal">
@@ -30,14 +37,28 @@
 <hr />
 
 <ul class="event-list">
-  <li *ngFor="let e of events" [ngClass]="{ income: e.isIncome, expense: !e.isIncome }">
+  <li *ngFor="let e of filteredEvents" [ngClass]="{ income: e.isIncome, expense: !e.isIncome }">
     <span class="date">{{ e.date }}</span>
     <span class="title">{{ e.title }}</span>
     <span class="amount"> {{ e.isIncome ? '+' : '-' }}{{ e.amount | number }} 円 </span>
 
     <div class="actions">
-      <button class="edit" (click)="onEdit(e)">編集</button>
-      <button class="delete" (click)="delete(e)">削除</button>
+      <button
+        class="edit"
+        (click)="openEditModal(e)"
+        [disabled]="selectedUser === 'both'"
+        title="ユーザーを選択すると編集できます"
+      >
+        編集
+      </button>
+      <button
+        class="delete"
+        (click)="delete(e)"
+        [disabled]="selectedUser === 'both'"
+        title="ユーザーを選択すると削除できます"
+      >
+        削除
+      </button>
     </div>
   </li>
 </ul>

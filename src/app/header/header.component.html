@@ -1,0 +1,21 @@
+<header class="app-header">
+  <!-- アプリタイトル -->
+  <div class="title">家計簿アプリ</div>
+
+  <!-- 右側エリア -->
+  <div class="controls">
+    <!-- ユーザー切替 -->
+    <select (change)="onUserChange($any($event.target).value)">
+      <option value="shin">shin</option>
+      <option value="saya">saya</option>
+      <option value="both" selected>both</option>
+    </select>
+
+    <!-- ナビゲーション -->
+    <nav class="nav">
+      <button (click)="go('list')">リスト</button>
+      <button (click)="go('graph')">グラフ</button>
+      <button (click)="go('calendar')">カレンダー</button>
+    </nav>
+  </div>
+</header>

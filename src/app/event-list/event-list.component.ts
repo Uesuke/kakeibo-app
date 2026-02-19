@@ -1,8 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
+import { forkJoin, finalize } from 'rxjs';
 import { EventsService, Event } from '../services/events.service';
 import { getPrevMonth, getNextMonth, getCurrentMonth } from '../utils/month.util';
 import { EventFormComponent } from '../event-form/event-form.component';
+import { UserStateService, AppUser } from '../core/user-state.service';
+import { paymentTypeToIsCredit } from '../utils/payment.util';
 
 @Component({
   selector: 'app-event-list',
@@ -19,11 +22,15 @@ import { EventFormComponent } from '../event-form/event-form.component';
   styleUrls: ['./event-list.component.scss'],
 })
 export class EventListComponent implements OnInit {
+  private eventsService = inject(EventsService);
+  private userState = inject(UserStateService);
+
   /**
    * 表示対象の家計簿イベント一覧
    * API から取得したデータを保持する
    */
   events: Event[] = [];
+  selectedUser: AppUser = 'both';
 
   /** 収入合計 */
   totalIncome = 0;
@@ -34,11 +41,8 @@ export class EventListComponent implements OnInit {
   /** 差引（収入 − 支出） */
   balance = 0;
 
-  /**
-   * 一覧取得時に使用するユーザー名
-   * ※ 将来的にはログイン情報から取得する想定
-   */
-  userName = 'Shin';
+  /** 編集・更新用の元日付 */
+  originalDate: string = '';
 
   /**
    * 現在表示中の月（YYYYMM）
@@ -62,11 +66,6 @@ export class EventListComponent implements OnInit {
 
   constructor(
     /**
-     * 家計簿イベント API 呼び出し用サービス
-     */
-    private eventsService: EventsService,
-
-    /**
      * Change Detection を手動で制御するために使用
      * API レスポンス後の描画ズレ対策
      */
@@ -78,24 +77,45 @@ export class EventListComponent implements OnInit {
    * - 初期月（今月）のイベント一覧を取得
    */
   ngOnInit(): void {
-    this.fetchEvents();
+    this.userState.user$.subscribe((user) => {
+      this.selectedUser = user;
+      this.fetchEvents();
+    });
   }
 
-  /**
-   * API からイベント一覧を取得する
-   * - userName + currentMonth を指定して月別に取得
-   * - 取得後に合計金額を再計算
-   */
   fetchEvents() {
-    this.eventsService.getEvents(this.userName, this.currentMonth).subscribe({
-      next: (items) => {
-        this.events = items;
-        this.calculateTotals();
+    if (this.selectedUser === 'both') {
+      /**
+       * 両ユーザーを並列取得
+       * forkJoin は全API完了後に配列で返す
+       */
+      forkJoin([
+        this.eventsService.getEvents('shin', this.currentMonth),
+        this.eventsService.getEvents('saya', this.currentMonth),
+      ]).subscribe({
+        next: ([shinEvents, sayaEvents]) => {
+          this.events = [...shinEvents, ...sayaEvents].sort((a, b) => b.date.localeCompare(a.date));
 
-        // 表示が反映されないケースへの保険
+          this.calculateTotals();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('イベント取得失敗', err),
+      });
+
+      return;
+    }
+
+    /**
+     * 単一ユーザー取得
+     */
+    this.eventsService.getEvents(this.selectedUser, this.currentMonth).subscribe({
+      next: (events) => {
+        this.events = events.sort((a, b) => b.date.localeCompare(a.date));
+
+        this.calculateTotals();
         this.cdr.detectChanges();
       },
-      error: (err) => console.error(err),
+      error: (err) => console.error('イベント取得失敗', err),
     });
   }
 
@@ -130,6 +150,14 @@ export class EventListComponent implements OnInit {
     return `${year}年${month}月`;
   }
 
+  /** 表示用イベント */
+  get filteredEvents() {
+    if (this.selectedUser === 'both') {
+      return this.events;
+    }
+    return this.events.filter((e) => e.userName === this.selectedUser || e.userName === 'both');
+  }
+
   /**
    * 前の月へ切り替え
    * - 月変更後、イベント一覧を再取得
@@ -137,6 +165,7 @@ export class EventListComponent implements OnInit {
   prevMonth() {
     this.currentMonth = getPrevMonth(this.currentMonth);
     this.fetchEvents();
+    this.cdr.detectChanges();
   }
 
   /**
@@ -146,6 +175,7 @@ export class EventListComponent implements OnInit {
   nextMonth() {
     this.currentMonth = getNextMonth(this.currentMonth);
     this.fetchEvents();
+    this.cdr.detectChanges();
   }
 
   /**
@@ -155,12 +185,14 @@ export class EventListComponent implements OnInit {
   goToCurrentMonth() {
     this.currentMonth = getCurrentMonth();
     this.fetchEvents();
+    this.cdr.detectChanges();
   }
 
   /**
    * イベント登録モーダルを表示する
    */
   openModal() {
+    if (this.selectedUser === 'both') return;
     this.editingEvent = null;
     this.isEditMode = false;
     this.showModal = true;
@@ -170,8 +202,10 @@ export class EventListComponent implements OnInit {
    * イベント編集モードでモーダルを表示する
    * @param event
    */
-  onEdit(event: Event) {
+  openEditModal(event: Event) {
+    if (this.selectedUser === 'both') return;
     this.editingEvent = event;
+    this.originalDate = event.date;
     this.isEditMode = true;
     this.showModal = true;
   }
@@ -189,27 +223,52 @@ export class EventListComponent implements OnInit {
    * EventFormComponent から emit された値を受け取る
    */
   onSubmit(formValue: any) {
+    if (this.selectedUser === 'both') {
+      alert('登録するユーザーを選択してください');
+      return;
+    }
+
+    const newDate = formValue.date.replace(/-/g, '');
+
     const payload = {
       ...formValue,
-      userName: this.userName,
-      date: formValue.date.replace(/-/g, ''),
-      isCredit: formValue.isIncome ? 0 : formValue.paymentType === 'credit' ? 1 : 0,
+      userName: this.selectedUser,
+      date: newDate,
+      isCredit: paymentTypeToIsCredit(formValue.isIncome, formValue.paymentType),
     };
 
     this.isSubmitting = true;
 
-    const request$ = this.editingEvent
-      ? this.eventsService.updateEvent(this.editingEvent.eventId, payload)
-      : this.eventsService.createEvent(payload);
+    let request$;
 
-    request$.subscribe({
-      next: () => {
-        this.closeModal();
-        this.fetchEvents();
-      },
-      error: (err) => console.error(err),
-      complete: () => (this.isSubmitting = false),
-    });
+    if (this.editingEvent) {
+      if (this.originalDate !== newDate) {
+        request$ = this.eventsService.changeEventDate(this.editingEvent.eventId, {
+          oldDate: this.originalDate,
+          newDate,
+        });
+      } else {
+        request$ = this.eventsService.updateEvent(this.editingEvent.eventId, payload);
+      }
+    } else {
+      request$ = this.eventsService.createEvent(payload);
+    }
+
+    request$
+      .pipe(
+        // UIロック解除
+        finalize(() => {
+          this.isSubmitting = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.fetchEvents();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   /**
@@ -220,7 +279,10 @@ export class EventListComponent implements OnInit {
     if (!ok) return;
 
     this.eventsService.deleteEvent(event.eventId).subscribe({
-      next: () => this.fetchEvents(),
+      next: () => {
+        this.fetchEvents();
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('削除失敗', err),
     });
   }

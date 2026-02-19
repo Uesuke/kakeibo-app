@@ -93,6 +93,32 @@
   width: 360px;
 }
 
+/* ===== 追加ボタン（淡いグリーン） ===== */
+.create {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e8f5e9; // 淡いグリーン（income背景と統一）
+  color: #2e7d32; // 濃いグリーン文字
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #c8e6c9;
+  }
+
+  &:disabled {
+    background: #f1f8e9; // さらに淡いグリーン
+    color: #a5d6a7;
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
 .actions {
   display: flex;
   gap: 8px;
@@ -125,4 +151,26 @@
   &:hover {
     background: #8e0000;
   }
+}
+
+/* ===== 編集・削除ボタンのdisabled追加 ===== */
+.actions .edit,
+.actions .delete {
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.actions .edit:disabled {
+  background: #bbdefb; // 薄いブルー
+  color: #90a4ae;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.actions .delete:disabled {
+  background: #ffcdd2; // 薄いレッド
+  color: #b0bec5;
+  cursor: not-allowed;
+  opacity: 1;
 }

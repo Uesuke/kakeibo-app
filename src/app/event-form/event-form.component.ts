@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Event } from '../services/events.service';
+import { isCreditToPaymentType } from '../utils/payment.util';
 
 @Component({
   selector: 'app-event-form',
@@ -61,7 +62,7 @@ export class EventFormComponent {
     this.form.patchValue({
       date: this.toInputDate(event.date),
       isIncome: event.isIncome,
-      paymentType: this.toPaymentType(event),
+      paymentType: isCreditToPaymentType(event.isIncome, event.isCredit),
       title: event.title ?? '',
       amount: event.amount,
     });
@@ -70,10 +71,5 @@ export class EventFormComponent {
   private toInputDate(date: string): string {
     // 20260201 → 2026-02-01
     return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
-  }
-
-  private toPaymentType(event: Event): 'cash' | 'credit' {
-    if (event.isIncome) return 'cash'; // 収入時は意味を持たせない
-    return event.isCredit === 1 ? 'credit' : 'cash';
   }
 }

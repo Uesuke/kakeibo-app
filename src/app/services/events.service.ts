@@ -84,6 +84,16 @@ export class EventsService {
   }
 
   /**
+   * イベント更新(日付更新)
+   *
+   * - eventId を指定して PUT
+   * - API 側の実装に応じて戻り値は Event or void
+   */
+  changeEventDate(eventId: string, data: { oldDate: string; newDate: string }) {
+    return this.http.put(`${this.baseUrl}/${eventId}/date`, data);
+  }
+
+  /**
    * イベント削除
    *
    * - eventId を指定して DELETE
