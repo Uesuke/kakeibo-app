@@ -1,18 +1,19 @@
 export type PaymentType = 'cash' | 'credit';
+export type CreditFlag = 0 | 1;
 
 /**
- * フォーム → API 変換
+ * フォーム → API
  */
 export function paymentTypeToIsCredit(
   isIncome: boolean,
   paymentType?: PaymentType,
-): 0 | 1 | undefined {
-  if (isIncome) return undefined;
+): CreditFlag | null {
+  if (isIncome) return null;
   return paymentType === 'credit' ? 1 : 0;
 }
 
 /**
- * API → フォーム変換
+ * API → フォーム
  */
 export function isCreditToPaymentType(
   isIncome: boolean,

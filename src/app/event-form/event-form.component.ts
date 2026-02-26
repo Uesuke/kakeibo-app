@@ -33,15 +33,73 @@ export class EventFormComponent {
   form = this.fb.group({
     date: [this.today, Validators.required],
     isIncome: [true, Validators.required],
-    paymentType: ['cash'], // 'cash' | 'credit'
+    paymentType: ['cash'],
     title: ['', Validators.required],
     amount: [0, [Validators.required, Validators.min(1)]],
+    isSplit: [false],
+    advanceAmount: [0],
   });
+
+  constructor() {
+    this.setupAutoAdvanceCalculation();
+  }
+
+  private setupAutoAdvanceCalculation() {
+    const isSplitCtrl = this.form.get('isSplit');
+    const amountCtrl = this.form.get('amount');
+
+    if (!isSplitCtrl || !amountCtrl) return;
+    // 割り勘ON/OFFで再計算
+    isSplitCtrl.valueChanges.subscribe((isSplit) => {
+      this.applySplitCalculation(isSplit, amountCtrl.value);
+    });
+
+    // 金額変更時も再計算（割り勘ONの時のみ）
+    amountCtrl.valueChanges.subscribe((amount) => {
+      if (isSplitCtrl.value) {
+        this.applySplitCalculation(true, amount);
+      }
+    });
+  }
+
+  private applySplitCalculation(
+    isSplit: boolean | null | undefined,
+    amount: number | null | undefined,
+  ) {
+    if (!isSplit) return;
+
+    const safeAmount = Number(amount ?? 0);
+    const half = Math.floor(safeAmount / 2);
+
+    this.form.patchValue({ advanceAmount: half }, { emitEvent: false });
+  }
+
+  get previewAdvance(): number {
+    const v = this.form.value;
+
+    if (v.isIncome) return 0;
+
+    let advance = 0;
+
+    if (v.isSplit && v.amount) {
+      advance += Math.floor(v.amount / 2);
+    }
+
+    if (!v.isSplit && v.advanceAmount) {
+      advance += Number(v.advanceAmount);
+    }
+
+    return advance;
+  }
 
   /** 編集時更新処理 */
   ngOnChanges() {
     if (this.editingEvent) {
       this.setFormForEdit(this.editingEvent);
+
+      if (this.form.value.isSplit) {
+        this.applySplitCalculation(true, this.form.value.amount);
+      }
     }
   }
 
@@ -65,6 +123,8 @@ export class EventFormComponent {
       paymentType: isCreditToPaymentType(event.isIncome, event.isCredit),
       title: event.title ?? '',
       amount: event.amount,
+      isSplit: event.isSplit ?? false,
+      advanceAmount: event.advanceAmount ?? 0,
     });
   }
 

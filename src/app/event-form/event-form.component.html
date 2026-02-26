@@ -1,4 +1,4 @@
-<h2>新規イベント</h2>
+<h2>{{ editingEvent ? 'イベント編集' : '新規イベント' }}</h2>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <!-- 日付 -->
@@ -51,10 +51,41 @@
     </label>
   </div>
 
+  <!-- 割り勘（支出のみ） -->
+  <div class="form-group inline" *ngIf="!form.value.isIncome">
+    <label>
+      <input type="checkbox" formControlName="isSplit" />
+      割り勘（1/2を立替）
+    </label>
+  </div>
+
+  <!-- 立替金額（支出のみ・割り勘OFF時のみ編集可能） -->
+  <div class="form-group" *ngIf="!form.value.isIncome">
+    <label>
+      立替金額
+      <input
+        type="number"
+        formControlName="advanceAmount"
+        [disabled]="form.value.isSplit || false"
+        [readOnly]="form.value.isSplit || false"
+        min="0"
+      />
+    </label>
+
+    <small *ngIf="form.value.isSplit"> 割り勘ON時は自動で金額の半分が立替になります </small>
+  </div>
+
+  <!-- 立替プレビュー -->
+  <div *ngIf="!form.value.isIncome && previewAdvance > 0" class="advance-preview">
+    <div class="advance-label">立替予定額</div>
+
+    <div class="advance-value">{{ previewAdvance | number }} 円</div>
+  </div>
+
   <!-- アクション -->
   <div class="actions">
     <button type="submit" [disabled]="form.invalid || isSubmitting">
-      {{ isSubmitting ? '登録中…' : '登録' }}
+      {{ isSubmitting ? '登録中…' : editingEvent ? '更新' : '登録' }}
     </button>
 
     <button type="button" (click)="close()" [disabled]="isSubmitting">閉じる</button>

@@ -71,3 +71,23 @@ form {
     background: #eee;
   }
 }
+
+.advance-preview {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.advance-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.advance-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+}

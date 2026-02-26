@@ -16,6 +16,8 @@ export interface Event {
   tagId?: string | null;
   title?: string;
   userName: string;
+  isSplit?: boolean;
+  advanceAmount?: number;
 }
 
 @Injectable({
