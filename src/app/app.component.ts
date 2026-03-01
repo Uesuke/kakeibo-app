@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
+import { AdvanceBalanceCardComponent } from './advance-balance-card/advance-balance-card.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, AdvanceBalanceCardComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

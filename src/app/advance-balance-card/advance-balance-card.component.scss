@@ -1,0 +1,68 @@
+.balance-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.reload-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.reload-btn:hover {
+  color: #111827;
+}
+
+.card-body {
+  padding: 8px 0 4px 0;
+}
+
+.amount {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.amount.zero {
+  color: #9ca3af;
+}
+
+.relation {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.loading {
+  color: #6b7280;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+}

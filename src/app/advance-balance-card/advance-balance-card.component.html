@@ -1,0 +1,23 @@
+<div class="balance-card">
+  <div class="card-header">
+    <span class="title">立替残高</span>
+    <button class="reload-btn" (click)="load()" title="再取得">↻</button>
+  </div>
+
+  <div class="card-body">
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading">読み込み中...</div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="error">立替情報を取得できませんでした</div>
+
+    <!-- Content -->
+    <div *ngIf="!loading && !error && balance">
+      <div class="relation">
+        {{ message }}
+      </div>
+
+      <div class="amount" [class.zero]="balance.amount === 0">{{ balance.amount | number }} 円</div>
+    </div>
+  </div>
+</div>
